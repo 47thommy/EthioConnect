@@ -5,11 +5,15 @@ const {
   signup,
   getAllUsers,
   getUser,
+  updateUser,
+  deleteUser,
 } = require("../controllers/userController");
 
 router.post("/login", login);
 router.post("/signup", signup);
 router.get("/:id", getUser);
 router.get("/", getAllUsers);
+router.patch("/:id", updateUser);
+router.delete("/:id", deleteUser);
 
 module.exports = router;

@@ -42,10 +42,59 @@ const getUser = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(404).json({ message: "No such user found" });
     }
-    const user = await User.findById(id);
+    const user = await User.findById(id).select(
+      "name email createdAt updatedAt"
+    );
     res.status(200).json(user);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
-module.exports = { login, signup, getAllUsers, getUser };
+
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "No such user found" });
+    }
+    // to update the user i will use the findByIdAndUpdate
+    // which will take two properties the id and the the fields to be updated
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: id,
+      },
+      { ...req.body }
+    );
+
+    if (!updatedUser) {
+      res.status(404).json({ message: "No such user found" });
+    }
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "No such user found" });
+    }
+    const deletedUser = await User.findByIdAndDelete({ _id: id });
+    if (!deletedUser) {
+      res.status(404).json({ message: "No such user found" });
+    }
+    res.status(200).json(deletedUser);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+module.exports = {
+  login,
+  signup,
+  getAllUsers,
+  getUser,
+  updateUser,
+  deleteUser,
+};
