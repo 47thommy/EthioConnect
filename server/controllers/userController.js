@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const generateToken = (_id) => {
   return jwt.sign({ _id }, process.env.JWT_SECRETE, { expiresIn: "3d" });
@@ -53,17 +54,24 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
+  const { password } = req.body;
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(404).json({ message: "No such user found" });
     }
     // to update the user i will use the findByIdAndUpdate
     // which will take two properties the id and the the fields to be updated
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
     const updatedUser = await User.findOneAndUpdate(
       {
         _id: id,
       },
-      { ...req.body }
+      {
+        ...req.body,
+        password: hash,
+      },
+      { new: true }
     );
 
     if (!updatedUser) {
